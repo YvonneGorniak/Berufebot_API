@@ -36,10 +36,8 @@ jobs:
       - name: Upload artifact for deployment jobs
         uses: actions/upload-artifact@v4
         with:
-          name: python-app
-          path: |
-            .
-            !antenv/
+          name: deploy-zip
+          path: release.zip
 
       # 🚫 Opting Out of Oryx Build
       # If you prefer to disable the Oryx build process during deployment, follow these steps:
@@ -68,3 +66,4 @@ jobs:
           app-name: 'berufebot-api'
           package: 'release.zip'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_77473977DF4D4350A73576EF3D03C52F }}
+
