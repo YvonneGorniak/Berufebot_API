@@ -46,21 +46,25 @@ jobs:
       # 1. Remove the SCM_DO_BUILD_DURING_DEPLOYMENT app setting from your Azure App Service Environment variables.
       # 2. Refer to sample workflows for alternative deployment strategies: https://github.com/Azure/actions-workflow-samples/tree/master/AppService
       
-
   deploy:
     runs-on: ubuntu-latest
     needs: build
-    
+  
     steps:
-      - name: Download artifact from build job
+      - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: python-app
-      
-      - name: 'Deploy to Azure Web App'
+          name: deploy-zip
+          path: .
+  
+      - name: Debug ZIP
+        run: |
+          ls -lh
+          unzip -l release.zip | sed -n '1,200p'
+  
+      - name: Deploy ZIP to Azure Web App
         uses: azure/webapps-deploy@v3
-        id: deploy-to-webapp
         with:
           app-name: 'berufebot-api'
-          slot-name: 'Production'
+          package: 'release.zip'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_77473977DF4D4350A73576EF3D03C52F }}
