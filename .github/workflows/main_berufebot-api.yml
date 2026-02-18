@@ -14,6 +14,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Ensure we are in repo root
+        run: |
+          echo "PWD:"
+          pwd
+          echo "Files:"
+          ls -R .
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -26,13 +33,13 @@ jobs:
 
       - name: Create deployment ZIP
         run: |
-          zip -r release.zip . \
-            -x "*.git*" \
-            -x "*.github*" \
-            -x "__pycache__/*" \
-            -x "*.pyc" \
-            -x "antenv/*" \
-            -x "venv/*"
+          echo "Creating ZIP in repo root..."
+          zip -r release.zip . -x "*.git*" -x "*.github*"
+
+      - name: Show ZIP details
+        run: |
+          ls -lh release.zip
+          unzip -l release.zip
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -55,4 +62,5 @@ jobs:
         with:
           app-name: "berufebot-api"
           package: "release.zip"
+
 
