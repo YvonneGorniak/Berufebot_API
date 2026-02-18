@@ -33,9 +33,14 @@ jobs:
       - name: Create deployment ZIP
         run: |
           echo "Creating ZIP in $(pwd)"
-          ls -la  # zeigt, ob wir im richtigen Verzeichnis sind
-          zip -r release.zip . -x "*.git*" -x "*.github*"
-          ls -la release.zip
+          ls -la  # zeigt, ob wir im richtigen Verzeichnis sind          
+          zip -r release.zip . \
+              -x "*.git*" \
+              -x "*.github*" \
+              -x "antenv/*" \
+              -x "venv/*" \
+              -x "__pycache__/*"
+
 
       # By default, when you enable GitHub CI/CD integration through the Azure portal, the platform automatically sets the SCM_DO_BUILD_DURING_DEPLOYMENT application setting to true. This triggers the use of Oryx, a build engine that handles application compilation and dependency installation (e.g., pip install) directly on the platform during deployment. Hence, we exclude the antenv virtual environment directory from the deployment artifact to reduce the payload size. 
       - name: Upload artifact for deployment jobs
@@ -71,6 +76,7 @@ jobs:
           app-name: 'berufebot-api'
           package: 'release.zip'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_77473977DF4D4350A73576EF3D03C52F }}
+
 
 
 
