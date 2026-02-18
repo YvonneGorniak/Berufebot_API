@@ -1,4 +1,4 @@
-name: Build and deploy Python app to Azure Web App - berufebot-api
+name: Deploy FastAPI to Azure Web App
 
 on:
   push:
@@ -11,27 +11,33 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Create deployment package
+      - name: Create deployment ZIP
         run: |
-          zip -r release.zip . -x "*.git*"
+          zip -r release.zip . \
+            -x "*.git*" \
+            -x "*.github*" \
+            -x "__pycache__/*" \
+            -x "*.pyc" \
+            -x "antenv/*" \
+            -x "venv/*"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: python-app
+          name: deploy-zip
           path: release.zip
 
   deploy:
@@ -42,19 +48,17 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: python-app
-          path: .
+          name: deploy-zip
 
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_577E9D804733484FAB84FDA7E0A1CEB5 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_4760BC7BB8FF4E96824B6A7C580AAA47 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_8D1FBA25739343198961DD906F294157 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID }}
 
-      - name: Deploy to Azure Web App
+      - name: Deploy ZIP to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'berufebot-api'
-          package: release.zip
-``
+          app-name: "berufebot-api"
+          package: "release.zip"
