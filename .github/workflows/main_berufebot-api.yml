@@ -29,31 +29,15 @@ jobs:
           echo "PWD = $(pwd)"
           echo "Listing:"
           ls -la   
-          
-      - name: Create deployment ZIP
-        run: |
-          echo "Creating ZIP in $(pwd)"
-          ls -la  # zeigt, ob wir im richtigen Verzeichnis sind          
-          zip -r release.zip . \
-              -x "*.git*" \
-              -x "*.github*" \
-              -x "antenv/*" \
-              -x "venv/*" \
-              -x "__pycache__/*"
 
-
-      # By default, when you enable GitHub CI/CD integration through the Azure portal, the platform automatically sets the SCM_DO_BUILD_DURING_DEPLOYMENT application setting to true. This triggers the use of Oryx, a build engine that handles application compilation and dependency installation (e.g., pip install) directly on the platform during deployment. Hence, we exclude the antenv virtual environment directory from the deployment artifact to reduce the payload size. 
-      - name: Upload artifact for deployment jobs
+      
+       #✔️ Kein ZIP mehr nötig! Azure baut selbst.
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: deploy-zip
-          path: release.zip
+            name: source
+            path: .
 
-      # 🚫 Opting Out of Oryx Build
-      # If you prefer to disable the Oryx build process during deployment, follow these steps:
-      # 1. Remove the SCM_DO_BUILD_DURING_DEPLOYMENT app setting from your Azure App Service Environment variables.
-      # 2. Refer to sample workflows for alternative deployment strategies: https://github.com/Azure/actions-workflow-samples/tree/master/AppService
-      
   deploy:
     runs-on: ubuntu-latest
     needs: build
@@ -62,20 +46,16 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: deploy-zip
+          name: source
           path: .
   
-      - name: Debug ZIP
-        run: |
-          ls -lh
-          unzip -l release.zip | sed -n '1,200p'
-  
-      - name: Deploy ZIP to Azure Web App
+      - name: Deploy Source to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'berufebot-api'
-          package: 'release.zip'
+          package: .
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_77473977DF4D4350A73576EF3D03C52F }}
+
 
 
 
